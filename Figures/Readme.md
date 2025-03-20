@@ -1,1 +1,1 @@
-This directory contains all codes for visualization.
+This directory contains all code related to visualization.
