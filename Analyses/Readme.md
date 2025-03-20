@@ -1,1 +1,1 @@
-This directory contains all codes for analyzing the data used in scRBP paper.
+This directory contains all code used for analyzing data presented in the scRBP paper.
