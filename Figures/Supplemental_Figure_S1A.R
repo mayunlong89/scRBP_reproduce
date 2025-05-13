@@ -6,7 +6,7 @@ library(ggplot2)
 data <- data.frame(
   Years = c(2006, 2011, 2013, 2013, 2014, 2015, 2016, 2017, 2020, 2022, 2023, 2023, 2023),
   Database = c("AEDB", "RBPDB", "SpliceAid-F", "CISBP-RNA", "RBPmap", "DoRiNA3", "ATtRACT", 
-               "MotifMap-RNA", "oRNAmEnt", "POSTAR3", "ENCORI", "RBP-Tar", "GEO-2024"),
+               "MotifMap-RNA", "oRNAment", "POSTAR3", "ENCORI", "RBP-Tar", "GEO-2024"),
   Number = c(108, 91, 18, 153, 223, 638, 1195, 244, 340, 4374, 9937, 3497, 4744)
 )
 
