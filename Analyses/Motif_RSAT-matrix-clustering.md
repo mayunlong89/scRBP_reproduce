@@ -154,6 +154,7 @@ python generate_cluster_txt_files.py
 #Step 7
 python batch_run_matrix_clustering.py
 
+### see annother folder "RSAT" for code details
 
 ```
 
