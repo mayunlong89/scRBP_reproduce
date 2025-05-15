@@ -92,8 +92,8 @@ python convert_pwm_to_cluster.py
 cbust  -g 20 -l -f 5 -c 3 ./cluster_pwm_for_cbuster/Cluster9_cluster_01.ppm /mnt/isilon/gandal_lab/mayl/reference/transcript_regions/5UTR_transcript_regions.fa > ./Cluster9_cluster_01_output.txt
 
 #batch--running
-# see codes in file 'batch_clusterbuster.py'
-python batch_clusterbuster.py
+# see codes in file 'batch_clusterbuster_5UTR.py'
+python batch_clusterbuster_5UTR.py
 
 
 
