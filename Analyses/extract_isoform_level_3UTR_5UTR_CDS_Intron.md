@@ -191,6 +191,7 @@ output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isof
 
 bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/3UTRs_hg38.bed -fo $output/3UTR_transcript_regions_isoform_v2.fa -name
 
+
 #5UTR
 ref=/mnt/isilon/gandal_lab/mayl/reference/
 bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
@@ -207,7 +208,6 @@ output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isof
 bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/CDS_hg38.bed -fo $output/CDS_transcript_regions_isoform_v2.fa -name
 
 
-
 #Introns
 ref=/mnt/isilon/gandal_lab/mayl/reference/
 bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
@@ -216,11 +216,23 @@ output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isof
 bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/Introns_hg38.bed -fo $output/Introns_transcript_regions_isoform_v2.fa -name
 
 
+```
 
+### 1.3 motif-target regions based on FIMO, HOMER2, Cluster-Buster methods
 
+```bash
 
+## see running scripts for these three tools with five independent strategies, which were used for benchmarking assessements
 
 ```
+
+
+
+
+
+
+
+
 
 
 
