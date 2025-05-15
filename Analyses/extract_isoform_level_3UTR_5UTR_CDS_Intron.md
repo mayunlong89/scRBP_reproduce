@@ -1,4 +1,6 @@
 
+`2025-05-15`
+`2024-07-21`
 
 ## 1. extract isoform_level 3UTR, 5UTR, CDS, intronic regions
 
@@ -174,7 +176,20 @@ write.table(bed_data_unique, file="introns_hg38.bed", quote=FALSE, sep="\t", row
 
 ```
 
+### 1.2 bedtools --getfasta extract sequences of 3UTR, 5UTR, CDS, Intronic regions convert into .fasta files
+```bash
 
+ref=/mnt/isilon/gandal_lab/mayl/reference/
+
+# Extract 3'UTR sequences using BED file
+bedtools getfasta \
+-fi $ref/gene_sequence_v44_GCRh38.fasta \
+-bed 3UTR.best_hit.hg38.bed \
+-fo 3UTR_motif_binding_sites.fasta \
+-name
+
+
+```
 
 
 
