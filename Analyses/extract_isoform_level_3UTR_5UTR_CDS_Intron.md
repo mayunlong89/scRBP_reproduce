@@ -182,11 +182,42 @@ write.table(bed_data_unique, file="introns_hg38.bed", quote=FALSE, sep="\t", row
 ref=/mnt/isilon/gandal_lab/mayl/reference/
 
 # Extract 3'UTR sequences using BED file
-bedtools getfasta \
--fi $ref/gene_sequence_v44_GCRh38.fasta \
--bed 3UTR.best_hit.hg38.bed \
--fo 3UTR_motif_binding_sites.fasta \
--name
+##------New version----2025-05-15------by adding `-name`
+
+#3UTR
+ref=/mnt/isilon/gandal_lab/mayl/reference/
+bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
+output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
+
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/3UTRs_hg38.bed -fo $output/3UTR_transcript_regions_isoform_v2.fa -name
+
+#5UTR
+ref=/mnt/isilon/gandal_lab/mayl/reference/
+bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
+output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
+
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/5UTRs_hg38.bed -fo $output/5UTR_transcript_regions_isoform_v2.fa -name
+
+
+#CDS
+ref=/mnt/isilon/gandal_lab/mayl/reference/
+bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
+output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
+
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/CDS_hg38.bed -fo $output/CDS_transcript_regions_isoform_v2.fa -name
+
+
+
+#Introns
+ref=/mnt/isilon/gandal_lab/mayl/reference/
+bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
+output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
+
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/Introns_hg38.bed -fo $output/Introns_transcript_regions_isoform_v2.fa -name
+
+
+
+
 
 
 ```
