@@ -1,0 +1,1 @@
+Rscript calculate_information_content.r 01_merged_3_10138motifs_all_databases_refined.meme motif_information_content.csv
