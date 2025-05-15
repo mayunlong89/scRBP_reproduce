@@ -4,6 +4,10 @@
 
 ## 1. extract isoform_level 3UTR, 5UTR, CDS, intronic regions
 
+#### activating conda environment
+
+` conda activate pyscenic`
+
 ### 1.1 Gene_coordinate_genomicsRanges.R 
 
 ```R
