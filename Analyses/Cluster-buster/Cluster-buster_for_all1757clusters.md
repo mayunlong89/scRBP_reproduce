@@ -1,4 +1,5 @@
 
+### 1.1 Note
 ```R
 ##------------------------------------------------------------------------------------
 # 2024-12-20
@@ -14,6 +15,7 @@
 ##------------------------------------------------------------------------------------
 ```
 
+### 1.2 running for 5UTR
 ```bash
 ##------------------------------------------------------------------------------------
 # 2024-12-11
@@ -95,10 +97,25 @@ cbust  -g 20 -l -f 5 -c 3 ./cluster_pwm_for_cbuster/Cluster9_cluster_01.ppm /mnt
 # see codes in file 'batch_clusterbuster_5UTR.py'
 python batch_clusterbuster_5UTR.py
 
+```
 
+### 1.3 Clustered motifs---> cluster annotation metadata.py
 
+```bash
+#2024-12-22
 
+#Working location:
+/mnt/isilon/gandal_lab/mayl/05_RNA_binding_protein/RBP_binding_sites/00_all_motifs_v2/03_cluster_buster/cluster_ID/
 
+#output: create_annotation_file.tsv
 
+python create_annotation_metadata.py
 
 ```
+
+
+
+
+
+
+
