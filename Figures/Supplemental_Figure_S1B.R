@@ -9,7 +9,7 @@ library(reshape2)
 library(ggrepel)
 
 
-data <- read.csv("Sup_Figure_S1A.csv")
+data <- read.csv("Sup_Figure_S1B.csv")
 
 # convert data format
 data_melted <- melt(data, id.vars = c("Years", "Database"), 
