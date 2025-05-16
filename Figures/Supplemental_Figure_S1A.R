@@ -17,12 +17,6 @@ data_melted <- melt(data, id.vars = c("Years", "Database"),
                     variable.name = "Motif_Type", 
                     value.name = "Count")
 
-
-data_melted <- melt(data, id.vars = c("Years", "Database"), 
-                    measure.vars = c("Clustered_motifs", "Unclustered_motifs"), 
-                    variable.name = "Motif_Type", 
-                    value.name = "Count")
-
 # set color
 colors <- c("Clustered_motifs" = "#66c2a5", "Unclustered_motifs" = "#fc8d62")
 
