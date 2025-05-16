@@ -8,7 +8,7 @@ library(ggplot2)
 library(readr)
 
 # Load the data
-data_file <- "Sup_Figure_S1B.csv"  # Replace with your actual file path
+data_file <- "Sup_Figure_S1C.csv"  # Replace with your actual file path
 df <- read.csv(data_file)
 
 # Set the minimum value explicitly
