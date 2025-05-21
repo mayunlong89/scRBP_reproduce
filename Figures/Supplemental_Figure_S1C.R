@@ -1,5 +1,5 @@
 
-#2025-05-13
+#2025-05-16
 
 setwd("/Users/mayunlong/Desktop/UPENN/00UPenn-Projects/02-Aimed_projects/05-devBrain-RBP-methods/00-Manuscript-scRBP-2024/01_Data_analysis/00-Figures/")
 
@@ -15,6 +15,8 @@ df <- read.csv(data_file)
 min_info_content <- min(df$Information_content)
 max_info_content <- max(df$Information_content)
 
+
+##---------categorized by 13 resources
 # Create the violin + boxplot
 ggplot(df, aes(x = Database, y = Information_content, fill = Database)) +
   geom_violin(trim = FALSE, alpha = 0.6) +
