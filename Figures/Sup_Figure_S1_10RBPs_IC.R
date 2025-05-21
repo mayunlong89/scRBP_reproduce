@@ -1,0 +1,56 @@
+
+#2025-05-13
+
+setwd("/Users/mayunlong/Desktop/UPENN/00UPenn-Projects/02-Aimed_projects/05-devBrain-RBP-methods/00-Manuscript-scRBP-2024/01_Data_analysis/00-Figures/")
+
+
+# load required packages
+library(ggplot2)
+library(readr)
+library(RColorBrewer)
+
+# Load the data
+data_file <- "Sup_Figure_S1C.csv"  # Replace with your actual file path
+df <- read.csv(data_file)
+
+RBPs_representative <- c("XRN2","FMR1","RBFOX2","SRSF1","FUS","DDX3X","FTO","DGCR8","CSDE1","PTBP1")
+data <- df[which(df$RBPs %in% RBPs_representative),]
+
+# Custom colors based on your provided order
+custom_colors <- c(
+  "CSDE1" = "#bc80bd",  # Soft purple
+  "DDX3X" = "#66c2a5",  # Soft green
+  "DGCR8" = "#8da0cb",  # Soft blue
+  "FMR1"  = "#fc8d62",  # Coral orange
+  "FTO"   = "#e78ac3",  # Soft pink
+  "FUS"   = "#fdb462",  # Soft orange
+  "PTBP1" = "#ff6347",  # Tomato red
+  "RBFOX2"= "#ffd92f",  # Soft yellow
+  "SRSF1" = "#fdb462",  # Soft orange
+  "XRN2"  = "#b3b3b3"   # Soft gray
+)
+
+# Set the order of RBPs to match the color order
+RBP_order <- c("CSDE1", "DDX3X", "DGCR8", "FMR1", "FTO", "FUS", "PTBP1", "RBFOX2", "SRSF1", "XRN2")
+
+# Plot Boxplot + Jitter
+ggplot(data, aes(x = factor(RBPs, levels = RBP_order), y = Information_content, color = RBPs)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.2, alpha = 0.6, size = 1.8) +
+  labs(title = "Information Content Distribution for Each RBP",
+       x = "RBP",
+       y = "Information Content (bits)") +
+  theme_minimal(base_size = 14) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_color_manual(values = custom_colors)
+
+
+#count the RBPs number 
+data_10rbp <- data[which(data$RBPs %in% RBP_order),]
+motif_counts <- as.data.frame(table(data_10rbp$RBPs))
+
+
+
+
+
+
