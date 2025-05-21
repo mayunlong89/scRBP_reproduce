@@ -12,7 +12,20 @@ python $universal_loc/python_split_pwm_into_separate_files.py ./01_merged_3_1013
 
 
 #@ Step 2， homer2 find 
-###------分成了100个文件， 下面是单独分析每个文件----------------------------------------------
+###------splites into 100 files----------------------------------------------
 fasta_ref=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions
 
 homer2 find -i $fasta_ref/5UTR_transcript_regions.fa -o homer2_5UTR_regions_targets_1.txt -m ./motifs_part_1.pwm -mscore -p 1 -strand both 
+
+
+###-----5UTR----------------------------------------------------------------------
+srun --mem=20G --time=10-00:00:00 --pty homer2 find -i /mnt/isilon/gandal_lab/mayl/reference/transcript_regions/5UTR_transcript_regions.fa -o homer2_5UTR_regions_targets_motifs_part_1.txt -m ../motifs_part_1.pwm -mscore -p 1 -strand both 
+
+
+srun --mem=20G --time=10-00:00:00 --pty homer2 find -i /mnt/isilon/gandal_lab/mayl/reference/transcript_regions/5UTR_transcript_regions.fa -o homer2_5UTR_regions_targets_motifs_part_2.txt -m ../motifs_part_2.pwm -mscore -p 1 -strand both 
+
+
+srun --mem=20G --time=10-00:00:00 --pty homer2 find -i /mnt/isilon/gandal_lab/mayl/reference/transcript_regions/5UTR_transcript_regions.fa -o homer2_5UTR_regions_targets_motifs_part_3.txt -m ../motifs_part_3.pwm -mscore -p 1 -strand both 
+
+
+srun --mem=100G --time=10-00:00:00 --pty homer2 find -i /mnt/isilon/gandal_lab/mayl/reference/transcript_regions/5UTR_transcript_regions.fa -o homer2_5UTR_regions_targets_motifs_part_10.txt -m ../motifs_part_10.pwm -mscore -p 1 -strand both 
