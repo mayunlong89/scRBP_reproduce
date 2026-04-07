@@ -12,7 +12,6 @@
 
 ```R
 # Set working directory
-setwd("/Users/mayunlong/Desktop/UPENN/00000------------UPenn-Projects/02-Aimed projects/05-devBrain-RBP-methods/RBP_data/")
 
 install.packages("RMariaDB")
 
