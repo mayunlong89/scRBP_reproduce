@@ -1,4 +1,3 @@
-
 ##-------Figure 2 ----dot plot-------2 cell types
 ##-------Figure 2 ----dot plot---monocyte count
 
@@ -6,22 +5,22 @@ library(tidyverse)
 library(ggplot2)
 library(grid)  # for unit()
 
-# 1) 读入你的长表：Cell_type, RBP, TRS, Dataset, Region
+# 1) Read in the long-format table: Cell_type, RBP, TRS, Dataset, Region
 df <- read.table("Figure_2_monocyte_heatmap.txt", sep = "\t", header = TRUE, check.names = FALSE)
 # ---- Dot plot with robust RBP clustering (ready to run) ----
 
 df$TRS <- as.numeric(df$TRS)
 
-# 2) 因子顺序（可按需改）
+# 2) Set factor levels (adjust if needed)
 df <- df %>%
   mutate(
     Cell_type = factor(Cell_type, levels = c("Monocytes","T_cells")),
     Region    = factor(Region,    levels = c("5UTR","CDS","Introns","3UTR")),
-    Dataset   = factor(Dataset,   levels = c("8.7K","6.5K"))
+    Dataset   = factor(Dataset,   levels = c("8.8K","6.6K"))
   )
 
 
-# 3) —— 稳健的 RBP 聚类顺序：列标准化 + NA=0 + 欧氏距离
+# 3) Robust RBP clustering order: column standardization + NA=0 + Euclidean distance
 cluster_rbps_euclid <- function(df) {
   mat_df <- df %>%
     mutate(key = paste(Cell_type, Region, Dataset, sep = "|")) %>%
@@ -32,7 +31,7 @@ cluster_rbps_euclid <- function(df) {
   mat <- mat_df %>% column_to_rownames("RBP") %>% as.matrix()
   if (nrow(mat) < 2) return(rownames(mat))
   
-  # 列中心化/标准化，避免某些列方差为0
+  # Column centering/standardization to avoid issues when some columns have zero variance
   col_means <- colMeans(mat, na.rm = TRUE)
   col_sds   <- apply(mat, 2, sd, na.rm = TRUE)
   for (j in seq_len(ncol(mat))) {
@@ -43,24 +42,25 @@ cluster_rbps_euclid <- function(df) {
       mat[, j] <- (mat[, j] - m) / s
     }
   }
-  mat[!is.finite(mat)] <- 0  # NA -> 0（列中心化后等价于均值）
+  mat[!is.finite(mat)] <- 0  # NA -> 0 (equivalent to column mean after centering)
   
-  d  <- stats::dist(mat, method = "euclidean")   # 显式用 stats::，避免方法冲突
+  d  <- stats::dist(mat, method = "euclidean")   # Explicitly use stats:: to avoid method conflicts
   hc <- stats::hclust(d, method = "average")
   rownames(mat)[hc$order]
 }
 
 rbp_order <- cluster_rbps_euclid(df)
 
-# 若只剩 1–2 个 RBP，回退为按全局均值排序
+# If only 1–2 RBPs remain, fall back to ordering by global mean TRS
 if (is.null(rbp_order) || length(rbp_order) < 2) {
   rbp_order <- df %>% group_by(RBP) %>%
     summarise(m = mean(TRS, na.rm = TRUE), .groups = "drop") %>%
     arrange(desc(m)) %>% pull(RBP)
 }
 
-# 4) 作图数据：大小=|TRS| 截顶；颜色=正/负；补全缺失组合保证网格完整
-CAP <- 6  # winsorize 上限（可调 5~8）
+# 4) Plotting data: size = |TRS| with capping; color = positive/negative;
+# complete missing combinations to keep the grid structure intact
+CAP <- 6  # winsorization upper limit (adjustable, e.g. 5~8)
 dfp <- df %>%
   mutate(
     RBP      = factor(RBP, levels = rbp_order),
@@ -78,7 +78,7 @@ rbp_order_full <- c(rbp_order, setdiff(sort(unique(df$RBP)), rbp_order))
 dfp <- dfp %>% mutate(RBP = factor(RBP, levels = rbp_order_full))
 
 
-# 5) 画图：纵向分面 = Cell_type → Region；面板内 y 轴为 Dataset
+# 5) Plot: vertical faceting = Cell_type → Region; y-axis within each panel = Dataset
 p <- ggplot(dfp, aes(x = RBP, y = Dataset)) +
   geom_point(aes(size = TRS_size, fill = sign),
              shape = 21, color = "white", stroke = 0.3, alpha = 0.9, na.rm = TRUE) +
@@ -102,4 +102,3 @@ p <- ggplot(dfp, aes(x = RBP, y = Dataset)) +
   )
 
 print(p)
-
