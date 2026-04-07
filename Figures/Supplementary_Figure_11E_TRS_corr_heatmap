@@ -1,0 +1,68 @@
+##_-----correlation---for 4 cell types
+##_-----correlation---for 4 cell types
+##_-----correlation---for 4 cell types
+# ========= packages =========
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(ComplexHeatmap)
+  library(circlize)
+})
+# ========= input =========
+df <- read_csv("00_4celltype_correlation.csv")  # or read_csv(...)
+# Assuming data.frame df already exists
+# Required columns: Regulon, cell_type, TRS_6.6K, TRS_8.8K
+stopifnot(all(c("Regulon","cell_type","TRS_6.6K","TRS_8.8K") %in% names(df)))
+# ========= Long table -> one Regulon x CellType matrix per dataset =========
+long <- df %>%
+  select(Regulon, cell_type, TRS_6.6K, TRS_8.8K) %>%
+  pivot_longer(starts_with("TRS_"),
+               names_to = "Dataset", values_to = "TRS") %>%
+  mutate(Dataset = recode(Dataset, `TRS_6.6K`="6.6K", `TRS_8.8K`="8.8K")) %>%
+  # If duplicate (Regulon, cell_type, Dataset) entries exist, take the mean
+  group_by(Regulon, cell_type, Dataset) %>%
+  summarise(TRS = mean(TRS, na.rm = TRUE), .groups = "drop")
+mat_by_ds <- function(ds) {
+  long %>%
+    filter(Dataset == ds) %>%
+    select(Regulon, cell_type, TRS) %>%
+    pivot_wider(names_from = cell_type, values_from = TRS) %>%
+    arrange(Regulon) %>%
+    column_to_rownames("Regulon") %>%
+    as.matrix()
+}
+mat6  <- mat_by_ds("6.6K")
+mat87 <- mat_by_ds("8.8K")
+# Keep only regulons common to both datasets to avoid NA issues
+regs <- intersect(rownames(mat6), rownames(mat87))
+mat6  <- mat6 [regs, , drop=FALSE]
+mat87 <- mat87[regs, , drop=FALSE]
+# ========= Compute pairwise correlations between 6.6K (columns) and 8.8K (columns) =========
+# Method: Pearson (can be changed to "spearman")
+COR_METHOD <- "pearson"
+# Correlate column vectors of the two matrices across common regulons
+cor_mat <- cor(mat6, mat87, use = "pairwise.complete.obs", method = COR_METHOD)
+# Make row/column names more compact
+rownames(cor_mat) <- paste0(rownames(cor_mat), " | 6.6K")
+colnames(cor_mat) <- paste0(colnames(cor_mat), " | 8.8K")
+# ========= Plot heatmap =========
+# Color palette: -1 -> blue, 0 -> white, 1 -> red
+pal <- colorRamp2(c(-1, 0, 1), c("#2166AC", "#F7F7F7", "#B2182B"))
+ht <- Heatmap(
+  cor_mat,
+  name = paste0("r (", COR_METHOD, ")"),
+  col = pal, na_col = "grey90",
+  cluster_rows = T,   # Keep original order (CD14+, FCGR3A+, CD4+, CD8+)
+  cluster_columns = T,
+  row_names_gp = gpar(fontsize = 10),
+  column_names_gp = gpar(fontsize = 10),
+  rect_gp = gpar(col = "white"),        # Grid lines for clarity
+  heatmap_legend_param = list(at = seq(-1,1,0.5))
+)
+draw(ht)
+# ========= Optional: save to file =========
+png("cor_6.6K_vs_8.8K_by_celltype.png", width = 1400, height = 1200, res = 200)
+draw(ht)
+dev.off()
+pdf("cor_6.6K_vs_8.8K_by_celltype.pdf", width = 7, height = 6)
+draw(ht)
+dev.off()
