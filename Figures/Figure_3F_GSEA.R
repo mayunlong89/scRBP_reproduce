@@ -8,7 +8,7 @@ setwd("/Users/mayunlong/Desktop/UPENN/00UPenn-Projects/02-Aimed_projects/05-devB
 # =========================
 # GSEA: OpenTargets CSV  ×  RBP regulons (GMT)
 # =========================
-# 依赖
+# Dependencies
 #BiocManager::install("fgsea")
 
 suppressPackageStartupMessages({
@@ -18,8 +18,8 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-# ---- 读取 OpenTargets CSV：给出基因列与分数字段 ----
-# 会做：去空白、去 NA、同基因多行时取最大分数、按分数降序
+# ---- Read OpenTargets CSV: specify gene column and score column ----
+# Steps: trim whitespace, remove NAs, take max score when a gene appears multiple times, sort by score descending
 read_opentargets_csv <- function_csv <- function(path, gene_col, score_col, to_upper = TRUE) {
   dt <- fread(path)
   stopifnot(gene_col %in% names(dt), score_col %in% names(dt))
@@ -27,12 +27,12 @@ read_opentargets_csv <- function_csv <- function(path, gene_col, score_col, to_u
   dt <- dt[!is.na(gene) & !is.na(score)]
   dt[, gene := str_trim(gene)]
   if (to_upper) dt[, gene := toupper(gene)]
-  # 同基因出现多次：取最大（也可改成 mean/median）
+  # If a gene appears multiple times: take the maximum (can also change to mean/median)
   dt <- dt[, .(score = max(score)), by = gene][order(-score)]
   setNames(dt$score, dt$gene)
 }
 
-# ---- 读取 GMT（NAME\tDESC\tg1\tg2... 或 NAME\tg1\tg2... 都兼容）----
+# ---- Read GMT (compatible with both NAME\tDESC\tg1\tg2... and NAME\tg1\tg2... formats) ----
 read_gmt <- function(path, to_upper = TRUE) {
   lines <- readLines(path, warn = FALSE)
   sets <- lapply(lines, function(ln) {
@@ -41,8 +41,8 @@ read_gmt <- function(path, to_upper = TRUE) {
     if (length(f) < 2) return(NULL)
     nm <- f[1]
     genes <- f[-1]
-    # 如果第二列是描述，且后面仍有基因，把第二列空掉：
-    # 经验规则：若第二列不全为字母/数字/下划线组合且后面>1基因，则看作描述列
+    # If the second column is a description and there are still genes after it, skip the second column:
+    # Heuristic: if the second column is not purely alphanumeric/underscore and there are >1 genes, treat it as a description column
     if (length(genes) > 1 && !grepl("^[A-Za-z0-9._-]+$", genes[1])) {
       genes <- genes[-1]
     }
@@ -53,16 +53,16 @@ read_gmt <- function(path, to_upper = TRUE) {
   nms <- sapply(strsplit(lines, "\t"), `[`, 1)
   names(sets) <- nms
   sets <- Filter(Negate(is.null), sets)
-  # 去重
+  # Deduplicate
   sets <- lapply(sets, function(v) unique(v[nzchar(v)]))
   sets
 }
 
-# ---- 主函数：运行 fgsea ----
+# ---- Main function: run fgsea ----
 run_gsea <- function(stats_named_vector, pathways_list,
                      minSize = 10, maxSize = 5000, nperm = 10000) {
   universe <- names(stats_named_vector)
-  # 交集过滤 + 大小限制
+  # Intersect filter + size limit
   pathways <- lapply(pathways_list, function(g) intersect(g, universe))
   sizes <- sapply(pathways, length)
   keep <- sizes >= minSize & sizes <= maxSize
@@ -73,7 +73,7 @@ run_gsea <- function(stats_named_vector, pathways_list,
               nperm = nperm,
               minSize = minSize,
               maxSize = maxSize)
-  # 增加一些实用列
+  # Add some useful columns
   fg$overlap <- vapply(fg$pathway,
                        function(p) length(intersect(pathways[[p]], universe)),
                        integer(1))
@@ -81,7 +81,7 @@ run_gsea <- function(stats_named_vector, pathways_list,
   fg[order(padj, pval, -NES), c("pathway","NES","pval","padj","size","set_size","overlap","leadingEdge")]
 }
 
-# ---- 可视化单个 regulon 的富集曲线 ----
+# ---- Visualize enrichment curve for a single regulon ----
 gsea_plot <- function(pathways_list, stats_named_vector, pathway_name, title = NULL) {
   stopifnot(pathway_name %in% names(pathways_list))
   p <- fgsea::plotEnrichment(pathways_list[[pathway_name]], stats_named_vector)
@@ -90,21 +90,21 @@ gsea_plot <- function(pathways_list, stats_named_vector, pathway_name, title = N
 }
 
 # =========================  
-# 使用示例（替换成你的文件路径与列名）
+# Usage example (replace with your file paths and column names)
 # =========================
-# 1) OpenTargets CSV：需要告诉哪一列是基因/分数
-#   常见：gene 符号列类似 "gene" / "geneSymbol"
-#        分数列类似 "overallScore" / "association_score" / "mlog10p"/"z"
+# 1) OpenTargets CSV: specify which column is gene/score
+#   Common examples: gene symbol column like "gene" / "geneSymbol"
+#                    score column like "overallScore" / "association_score" / "mlog10p" / "z"
 ot_stats <- function_csv("01_opentargts_monocyte.csv",
                          gene_col  = "symbol",
-                         score_col = "gwasCredibleSets")         # 改成你的分数字段
+                         score_col = "gwasCredibleSets")         # change to your score field
 
-# 2) Regulons GMT：包含多条 RBP_regulon
+# 2) Regulons GMT: contains multiple RBP_regulon entries
 regulons <- read_gmt("../00-6.5K_100runs_regulons-GO-KEGG/scRBP_prune_matched_results_min10genes.symbol_default_6.5K_3UTR.gmt")
 regulons <- read_gmt("../00-6.5K_100runs_regulons-GO-KEGG/scRBP_prune_matched_results_min10genes.symbol_default_6.5K_5UTR.gmt")
 regulons <- read_gmt("../00-6.5K_100runs_regulons-GO-KEGG/scRBP_prune_matched_results_min10genes.symbol_default_6.5K_Introns.gmt")
 
-# 3) 运行 GSEA（建议 nperm 至少 10000；正式结果 100000）
+# 3) Run GSEA (recommend nperm at least 10000; use 100000 for final results)
 fg_res <- run_gsea(ot_stats, regulons, minSize = 10, maxSize = 5000, nperm = 100000)
 
 fg_res$padj_BY <- p.adjust(fg_res$pval, method = "BY")
@@ -113,40 +113,40 @@ fg_res$padj_BH <- p.adjust(fg_res$pval, method = "BH")
 head(fg_res)
 
   
-# 5) 导出结果
+# 5) Export results
 data.table::fwrite(fg_res, "fgsea_RBP_regulons_vs_OpenTargets_3UTR.csv")
 data.table::fwrite(fg_res, "fgsea_RBP_regulons_vs_OpenTargets_5UTR.csv")
 data.table::fwrite(fg_res, "fgsea_RBP_regulons_vs_OpenTargets_Introns.csv")
 
 
-# 找到 CELF1 regulon 这一行（名字可能是 "CELF1" 或 "CELF1_regulon"）
+# Find the row for the CELF1 regulon (name may be "CELF1" or "CELF1_regulon")
 row <- fg_res[fg_res$pathway %in% c("CELF1", "CELF1_regulon"), ][1, ]
 
-# 取出 leading edge 基因向量
+# Extract leading edge gene vector
 le <- unlist(row$leadingEdge)
 length(le); le[1:10]  
 
 
-# 假设 fg_res 是 run_gsea(...) 的结果；ot_stats 是命名向量(已按降序)
+# Assuming fg_res is the output of run_gsea(...); ot_stats is a named vector (already sorted descending)
 row <- fg_res[fg_res$pathway %in% c("QKI","QKI_regulon"), ][1, ]
 row[, c("pathway","NES","size","pval","padj")]
 
-# 取 leading edge 并按 OpenTargets 排名从前到后列出
+# Extract leading edge and list genes in OpenTargets rank order (front to back)
 le <- unlist(row$leadingEdge)
-ord <- order(rank(ot_stats))                               # fgsea 用的顺序
+ord <- order(rank(ot_stats))                               # order used by fgsea
 le_tab <- data.frame(
   gene = le,
   score = ot_stats[le],
   rank  = match(le, names(ot_stats))
 )[order(le_tab$rank), ]
-nrow(le_tab)                         # leading edge 基因数
-min(le_tab$rank) / length(ot_stats)  # 覆盖起点（占总排名的比例）
-max(le_tab$rank) / length(ot_stats)  # 覆盖终点
-head(le_tab, 15)                     # 前 15 个 leading edge 基因
+nrow(le_tab)                         # number of leading edge genes
+min(le_tab$rank) / length(ot_stats)  # coverage start (proportion of total rank)
+max(le_tab$rank) / length(ot_stats)  # coverage end
+head(le_tab, 15)                     # top 15 leading edge genes
 
 
-# 4) 绘制某个 regulon 的富集曲线（例如 YBX3_regulon）
-# 4) 绘制某个 regulon 的富集曲线（例如 YBX3_regulon）
+# 4) Plot enrichment curve for a regulon (e.g. YBX3_regulon)
+# 4) Plot enrichment curve for a regulon (e.g. YBX3_regulon)
 #--3UTR
 #gsea_plot(regulons, ot_stats, "CELF1", title = "CELF1_regulon ~ OpenTargets ranks")
 #gsea_plot(regulons, ot_stats, "SF3B4", title = "SF3B4_regulon ~ OpenTargets ranks")
@@ -161,7 +161,7 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-# 将 data.frame / 向量统一为“命名数值向量”的工具
+# Utility to coerce data.frame / vector into a named numeric vector
 coerce_stats_vec <- function(stats, gene_col = NULL, score_col = NULL, to_upper = TRUE) {
   if (is.numeric(stats) && !is.null(names(stats))) {
     v <- stats
@@ -171,46 +171,46 @@ coerce_stats_vec <- function(stats, gene_col = NULL, score_col = NULL, to_upper 
     colnames(df) <- c("gene","score")
     df <- df[!is.na(df$gene) & !is.na(df$score), ]
     if (to_upper) df$gene <- toupper(trimws(df$gene))
-    # 同基因出现多次取最大分数
+    # Take max score when a gene appears multiple times
     df <- aggregate(score ~ gene, df, max)
     v <- df$score; names(v) <- df$gene
   } else {
-    stop("`stats` 必须是命名数值向量或 data.frame/tibble。")
+    stop("`stats` must be a named numeric vector or data.frame/tibble.")
   }
   v <- v[is.finite(v)]
   if (to_upper) names(v) <- toupper(names(v))
-  # 去重复：同名保留最大
+  # Deduplicate: keep maximum for same name
   v <- tapply(v, names(v), max)
   v[order(v, decreasing = TRUE)]
 }
 
-# 画 enrichment + 正确标注 LE（红）与非LE（灰）
+# Plot enrichment + correctly annotate LE (red) vs non-LE (grey)
 plot_enrichment_with_le <- function(pathway_name, pathways, stats,
                                     fg_res = NULL,
                                     gene_col = NULL, score_col = NULL,
                                     to_upper = TRUE,
                                     le_col = "red", other_col = "grey40") {
   
-  # 1) 排行（命名向量，降序）
+  # 1) Ranked list (named vector, descending)
   geneList <- coerce_stats_vec(stats, gene_col, score_col, to_upper)
   
-  # 2) 取集合（兼容名字可能是 "QKI" 或 "QKI_regulon"）
+  # 2) Get gene set (compatible with names like "QKI" or "QKI_regulon")
   set_genes <- pathways[[pathway_name]]
   if (is.null(set_genes)) {
     alt <- sub("_regulon$", "", pathway_name)
     if (!identical(alt, pathway_name)) set_genes <- pathways[[alt]]
   }
-  if (is.null(set_genes)) stop("在 pathways 里找不到集合：", pathway_name)
+  if (is.null(set_genes)) stop("Gene set not found in pathways: ", pathway_name)
   if (to_upper) set_genes <- toupper(set_genes)
   set_genes <- unique(set_genes)
   
-  # 3) overlap 检查
+  # 3) Overlap check
   ov <- intersect(names(geneList), set_genes)
   message(sprintf("Set size = %d, universe = %d, overlap = %d",
                   length(set_genes), length(geneList), length(ov)))
-  if (length(ov) == 0) stop("该集合与排行无交集（大小写或ID不一致）。")
+  if (length(ov) == 0) stop("No overlap between gene set and ranked list (check case or ID format).")
   
-  # 4) leading edge：优先从 fg_res 拿；拿不到就临时跑一次 fgsea
+  # 4) Leading edge: preferentially from fg_res; otherwise run a quick fgsea
   le_genes <- NULL
   if (!is.null(fg_res) && "pathway" %in% names(fg_res)) {
     row <- fg_res[fg_res$pathway %in% c(pathway_name, sub("_regulon$", "", pathway_name)), ]
@@ -221,11 +221,11 @@ plot_enrichment_with_le <- function(pathway_name, pathways, stats,
     le_genes <- unlist(tmp$leadingEdge)
   }
   
-  # 5) 位置（与 plotEnrichment 保持一致）
+  # 5) Positions (consistent with plotEnrichment)
   all_idx <- which(names(geneList) %in% set_genes)
   le_idx  <- which(names(geneList) %in% le_genes)
   
-  # 6) 绘图
+  # 6) Plot
   p <- fgsea::plotEnrichment(set_genes, geneList, ticksSize = 0) +
     ggtitle(paste0(pathway_name, " ~ OpenTargets ranks"))
   p +
@@ -257,42 +257,36 @@ plot_enrichment_with_le("RBM47", regulons, ot_stats, fg_res)
 plot_enrichment_with_le("YBX3", regulons, ot_stats, fg_res)
 
 
-
-
-
-
-
-
-# 把它们的 OpenTargets 分数与排名一起列出来
+# List their OpenTargets scores and ranks together
 library(dplyr)
 le_tab <- tibble(
   gene = le,
   score = ot_stats[le],
-  rank  = match(le, names(ot_stats))  # ot_stats 已按降序
+  rank  = match(le, names(ot_stats))  # ot_stats is already sorted descending
 ) |> arrange(rank)
 le_tab
 
 
-# stats 已按降序；pathways 是你的 regulon 列表
-ord <- order(rank(ot_stats))                       # fgsea 用的顺序
+# stats is already sorted descending; pathways is your regulon list
+ord <- order(rank(ot_stats))                       # order used by fgsea
 pos_all <- which(names(ot_stats)[ord] %in% regulons[["CELF1"]])
-length(pos_all)    # 应该等于 28
-pos_all[1:20]      # 看前20个位置
+length(pos_all)    # should equal 28
+pos_all[1:20]      # check the first 20 positions
 
 plot_enrichment_with_le("CELF1", regulons, ot_stats, fg_res)
 
 p <- fgsea::plotEnrichment(regulons[["CELF1"]], ot_stats, ticksSize = 0.15) +
   ggtitle("CELF1_regulon ~ OpenTargets ranks") +
-  coord_cartesian(clip = "off")                # 防止被裁剪
+  coord_cartesian(clip = "off")                # prevent clipping
 
-# 额外在底部再画一层 rug（每个基因一个刻度；不容易被覆盖）
+# Add an extra rug layer at the bottom (one tick per gene; less likely to be obscured)
 ticks_df <- data.frame(x = pos_all)
 p <- p + ggplot2::geom_rug(data = ticks_df, aes(x = x), sides = "b",
                            inherit.aes = FALSE, alpha = 0.7)
 p
 
 
-# 拿到 leading edge
+# Get leading edge
 le <- unlist(fg_res[fg_res$pathway %in% c("CELF1","CELF1_regulon"), ]$leadingEdge)
 pos_le <- which(names(ot_stats)[ord] %in% le)
 pos_rest <- setdiff(pos_all, pos_le)
@@ -306,15 +300,15 @@ p +
                inherit.aes = FALSE, size = 0.3, color = "red")
 
 
-# 导出更宽的图片以减少重叠
+# Export a wider figure to reduce overlap
 # ggsave("CELF1_gsea.png", p, width = 12, height = 5, dpi = 300)
 
 
 
-#------Figure_2e
+#------Figure_3F
 
 ##_--------dotplot for regulon-opentargets enrichment
-# ---- 数据 ----
+# ---- Data ----
 txt <- "Regulon	NES	logp	padj
 QKI_5UTR	1.307591657	5.000004343	0.000559994
 DDX3X_5UTR	1.238209431	3.366535887	0.01203988
@@ -345,19 +339,19 @@ XRN2_Introns	0.914503258	0.07780326	0.926769111"
 
 df <- read.table(text = txt, header = TRUE, sep = "\t", check.names = FALSE)
 
-# 调色板：padj 越小越深
+# Color palette: darker color for smaller padj
 pal <- colorRampPalette(c("#FAF3E3", "#FBB394", "#F87C56"))(256)
 
-# 标注：只给 FDR<0.05 的点加标签（按需修改阈值）
+# Labels: only add labels for points with FDR < 0.05 (adjust threshold as needed)
 df$label <- ifelse(df$logp > 1.47418239, df$Regulon, NA)
 
-# ---- 作图 ----
+# ---- Plot ----
 library(ggplot2)
 library(ggrepel)
 
 p <- ggplot(df, aes(x = logp, y = NES, color = NES)) +
   geom_point(size = 4) +
-  # 反转调色：padj 越小越深（用 rev(pal) 即可）
+  # Reverse color scale: darker for smaller padj (use rev(pal))
   scale_color_gradientn(colors = pal, name = "NES") +
   geom_text_repel(aes(label = label),
                   max.overlaps = Inf, box.padding = 0.35, point.padding = 0.25,
@@ -369,8 +363,3 @@ p <- ggplot(df, aes(x = logp, y = NES, color = NES)) +
 
 p
 # ggsave("regulon_scatter.png", p, width = 5, height = 6, dpi = 300)
-
-
-
-
-
