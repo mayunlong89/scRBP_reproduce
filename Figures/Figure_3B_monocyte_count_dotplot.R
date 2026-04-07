@@ -1,5 +1,5 @@
-##-------Figure 2 ----dot plot-------2 cell types
-##-------Figure 2 ----dot plot---monocyte count
+##-------Figure 3B ----dot plot-------2 cell types
+##-------Figure 3B ----dot plot---monocyte count
 
 library(tidyverse)
 library(ggplot2)
