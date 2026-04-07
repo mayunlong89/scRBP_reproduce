@@ -1,3 +1,76 @@
+
+###############################################################################################################################################################
+
+#######-----------------Python version
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import mannwhitneyu
+
+# 1️⃣ 过滤低 importance 边
+grn_df_filtered_plot = grn_df[grn_df["Importance"] >= 0.005].copy()
+
+# 2️⃣ 按 correlation 归类
+def classify_link(rho):
+    if rho < -0.03:
+        return "Repressing"
+    elif rho > 0.03:
+        return "Activating"
+    else:
+        return "Neutral"
+
+grn_df_filtered_plot["Group"] = grn_df_filtered_plot["correlation"].apply(classify_link)
+
+# 3️⃣ 计算两两比较的 p 值（Mann–Whitney U）
+activating_vals = grn_df_filtered_plot.loc[grn_df_filtered_plot["Group"] == "Activating", "Importance"]
+repressing_vals  = grn_df_filtered_plot.loc[grn_df_filtered_plot["Group"] == "Repressing",  "Importance"]
+neutral_vals     = grn_df_filtered_plot.loc[grn_df_filtered_plot["Group"] == "Neutral",     "Importance"]
+
+p_act_neu = mannwhitneyu(activating_vals, neutral_vals, alternative="two-sided").pvalue
+p_rep_neu = mannwhitneyu(repressing_vals,  neutral_vals, alternative="two-sided").pvalue
+
+print(f"Activating vs Neutral p = {p_act_neu:.3e}")
+print(f"Repressing  vs Neutral p = {p_rep_neu:.3e}")
+
+# 4️⃣ 绘制 boxplot（自定义顺序）
+order = ["Neutral", "Repressing", "Activating"]
+palette = {"Neutral":"gray", "Repressing":"steelblue", "Activating":"darkorange"}
+
+plt.figure(figsize=(8, 6))
+ax = sns.boxplot(
+    data=grn_df_filtered_plot,
+    x="Group",
+    y="Importance",
+    order=order,
+    palette=palette
+)
+plt.yscale("log")
+plt.title("Importance Score Distribution by Correlation Group\n(Importance ≥ 0.005)")
+plt.xlabel("RBP-Gene Link Type")
+plt.ylabel("Importance Score (log scale)")
+
+# 5️⃣ 在图上标注显著性
+y_max = grn_df_filtered_plot["Importance"].max()
+y_step = y_max * 0.15          # 控制标注高度
+# Activating vs Neutral
+ax.plot([0, 2], [y_max, y_max], color="black", linewidth=1)
+ax.text(1, y_max*1.05, f"p = {p_act_neu:.1e}", ha="center")
+# Repressing vs Neutral
+ax.plot([0, 1], [y_max - y_step, y_max - y_step], color="black", linewidth=1)
+ax.text(0.5, (y_max - y_step)*1.05, f"p = {p_rep_neu:.1e}", ha="center")
+
+plt.tight_layout()
+plt.savefig("05_boxplot_importance_by_group_with_stats.png", dpi=300)
+plt.savefig("05_boxplot_importance_by_group_with_stats_python.pdf", dpi=300)
+plt.close()
+
+
+###############################################################################################################################################################
+
+###############################################################################################################################################################
+
+
+#######------------------R version
 # ── Load required packages ──────────────────────────────────────────
 library(dplyr)
 library(ggplot2)
