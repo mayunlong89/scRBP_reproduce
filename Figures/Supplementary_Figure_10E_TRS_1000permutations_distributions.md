@@ -1,7 +1,11 @@
 
 #2025-10-13
 
+See the code `plot_trs_null.py` in [here](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/plot_trs_null.py)
+
+```bash
 #---6.6K cells  
+
 
 #DDX21
 Tool=/mnt/isilon/gandal_lab/mayl/02_single-cell_data_ctDRTF/10blood_cell_traits_GWAS/10_lymp_count
@@ -298,7 +302,7 @@ python $Tool/plot_trs_null.py \
   --cell-type T_cells \
   --out AKAP1_Tcells.TRS_null_8.7K_monocyte_count_5UTR.pdf
     
-    
+```
  
  
  
