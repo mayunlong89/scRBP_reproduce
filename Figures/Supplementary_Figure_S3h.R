@@ -1,0 +1,59 @@
+# ── Load required packages ──────────────────────────────────────────
+library(dplyr)
+library(ggplot2)
+
+# Assume grn_df is already loaded in the environment; if needed, use read.csv()/readr::read_csv() to load it
+
+#grn_df <- read.csv("RBP_gene_with_all_correlation_without_filtered.csv")
+
+grn_df <- read.csv("z_GRNBoost2_result_200Kcells_correlation_v6_update4_with_correlation.tsv", sep="\t") 
+
+# 1️⃣ Filter low-importance links
+grn_df_filtered <- grn_df %>%
+  filter(Importance >= 0.005)
+
+# 2️⃣ Classify links into groups
+grn_df_filtered <- grn_df_filtered %>% 
+  mutate(Group = case_when(
+    Correlation < -0.03 ~ "Repressing",
+    Correlation >  0.03 ~ "Activating",
+    TRUE                ~ "Neutral"
+  ))
+
+# 3️⃣ Calculate p-values (Wilcoxon / Mann–Whitney U test)
+act_vals <- grn_df_filtered %>% filter(Group == "Activating") %>% pull(Importance)
+rep_vals <- grn_df_filtered %>% filter(Group == "Repressing")  %>% pull(Importance)
+neu_vals <- grn_df_filtered %>% filter(Group == "Neutral")     %>% pull(Importance)
+
+#p_act_neu <- wilcox.test(act_vals, neu_vals)$p.value
+#p_rep_neu <- wilcox.test(rep_vals, neu_vals)$p.value
+
+# 4️⃣ Plot
+order_levels <- c("Neutral", "Repressing", "Activating")
+pal          <- c(Neutral = "gray", Repressing = "steelblue", Activating = "darkorange")
+
+y_max  <- max(grn_df_filtered$Importance)
+y_step <- y_max * 0.15              # Control the spacing between the two significance bars
+
+p <- ggplot(grn_df_filtered, aes(x = factor(Group, levels = order_levels),
+                                 y = Importance, fill = Group)) +
+  geom_boxplot(outlier.size = 0.3, outlier.alpha = 0.5) +
+  scale_fill_manual(values = pal) +
+  scale_y_log10() +
+  labs(title = "Importance Score Distribution by Correlation Group\n(Importance ≥ 0.005)",
+       x = "RBP-Gene Link Type",
+       y = "Importance Score (log scale)") +
+  theme_classic(base_size = 14) +
+  theme(legend.position = "none") 
+
+  # —— Add significance bars and labels —— 
+ # geom_segment(aes(x = 1, xend = 3, y = y_max,       yend = y_max)) +
+ # annotate("text", x = 2, y = y_max * 1.05,
+ #          label = sprintf("p = %.1e", p_act_neu)) +
+ # geom_segment(aes(x = 1, xend = 2, y = y_max - y_step, yend = y_max - y_step)) +
+ # annotate("text", x = 1.5, y = (y_max - y_step) * 1.05,
+  #         label = sprintf("p = %.1e", p_rep_neu))
+
+# 5️⃣ Save figure: PNG (change the suffix to save as PDF)
+ggsave("05_boxplot_importance_by_group_with_stats.png",
+       plot = p, width = 6, height = 5, dpi = 300)
