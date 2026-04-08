@@ -8,8 +8,8 @@ This workflow benchmarks five RBP motif scanning strategies by evaluating their 
 
 | Method | Description |
 |--------|-------------|
-| **Clustered motifs** | 3,866 clustered motifs from scRBP |
-| **Archetype motifs** | 1,050 archetype motifs from scRBP |
+| **Clustered motifs** | Clustered motifs from scRBP |
+| **Archetype motifs** | Archetype motifs from scRBP |
 | **Singleton motifs** | Individual motifs run independently from scRBP |
 | **FIMO** | Motif scanning via FIMO (MEME Suite) |
 | **HOMER2** | Motif scanning via HOMER2 |
