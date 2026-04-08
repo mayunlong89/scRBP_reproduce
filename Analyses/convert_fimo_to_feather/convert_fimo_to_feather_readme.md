@@ -1,4 +1,4 @@
-
+# For CDS (Gene and Isoform), 5'UTR (Gene and Isoform), 3'UTR (Gene and Isoform), Intron (Gene), we used this version.
 
 ```bash
 python convert_fimo_to_feather.py --input_file fimo_best_site_narrowPeak_targets_rankedByPvalue_ranked.tsv --input_dir /path/to/input/dir --output_dir /path/to/output/dir
@@ -35,6 +35,19 @@ srun --mem=850G --cpus-per-task=20 --time=40-00:00:00 \
   --input_dir $bed_intron \
   --output_dir $final_intron/Cluster_Buster_matrix_Introns_isoform_final_20476_v2
 
-
-
 ```
+
+# For Intron (isoform), we use an enhanced version due to the file is so big.
+
+srun --mem=850G --cpus-per-task=20 --time=7-00:00:00 \
+  --export=ALL,OMP_NUM_THREADS=1,MKL_NUM_THREADS=1,OPENBLAS_NUM_THREADS=1,VECLIB_MAXIMUM_THREADS=1,NUMEXPR_MAX_THREADS=1 \
+  --pty python $TOOL/convert_fimo_to_feather_enhanced.py \
+    --input_file merged_all_20746motifs_for_final_motif_isoforms_rankings_Introns_ranked_noVersion.bed \
+    --input_dir $bed_intron \
+    --output_dir $final_intron/Cluster_Buster_matrix_Introns_isoform_final_20746_v2
+
+For more details on `convert_fimo_to_feather_enhanced`, please refer to see [here](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/convert_fimo_to_feather/convert_fimo_to_feather_enhanced.py)
+
+
+
+
