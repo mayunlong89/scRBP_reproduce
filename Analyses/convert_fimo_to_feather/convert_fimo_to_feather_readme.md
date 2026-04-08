@@ -10,8 +10,8 @@ For more details on `convert_fimo_to_feather.py`, please refer to see [here](htt
 # Example
 
 ```bash
-#location:-----Introns---2026-04-07
-#location:-----Introns---2026-04-07
+#location:-----Introns--
+#location:-----Introns--
 
 #----	Remove version numbers from ENST transcript IDs.
 final_intron=/mnt/isilon/gandal_lab/mayl/05_RNA_binding_protein/RBP_binding_sites/10_final_version_motif_rankings
