@@ -4,7 +4,7 @@
 python convert_fimo_to_feather.py --input_file fimo_best_site_narrowPeak_targets_rankedByPvalue_ranked.tsv --input_dir /path/to/input/dir --output_dir /path/to/output/dir
 ```
 
-For more details on `convert_fimo_to_feather.py`, please refer to see [here]()
+For more details on `convert_fimo_to_feather.py`, please refer to see [here](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/convert_fimo_to_feather/convert_fimo_to_feather.py)
 
 
 # Example
