@@ -77,7 +77,7 @@ dev.off()
 
 
 
-# ========== Additional section ========== Regulon size
+# ========== Additional section ========== Module size
 # Compute regulon size (i.e., number of targets) for each RBP in each method
 regulon_sizes <- lapply(names(networks), function(method) {
   rbp_targets <- networks[[method]]
@@ -89,7 +89,7 @@ regulon_sizes <- lapply(names(networks), function(method) {
 }) %>% bind_rows()
 
 
-# Visualization: boxplot of regulon sizes
+# Visualization: boxplot of Module sizes
 pdf("regulon_size_distribution_boxplot_15conditions.pdf", width = 10, height = 8)
 
 ggplot(regulon_sizes, aes(x = reorder(Method, Size, median), y = Size)) +
