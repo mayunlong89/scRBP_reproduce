@@ -8,8 +8,8 @@ This pipeline evaluates how cell population size affects the stability and repro
 
 | # | Tissue | Total cells | Reference size | Working directory |
 |---|--------|-------------|----------------|-------------------|
-| 1 | Adult brain |  | 209,801 | `.../Palmer_hardwick_short_read/z_04_cell_sizes_regulons` |
-| 2 | PBMC | 172,601 | 170K (all 173,684) | `.../10X_covid19_PBMC` |
+| 1 | Adult brain | 209,801 | 200K | `.../Palmer_hardwick_short_read/z_04_cell_sizes_regulons` |
+| 2 | PBMC | 172,601 | 170K | `.../10X_covid19_PBMC` |
 | 3 | Fetal brain | 599,221 | 200K | `.../replication_2_developing_brain_cells` |
 
 **Experimental design:**
