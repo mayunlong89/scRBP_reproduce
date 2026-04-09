@@ -29,9 +29,9 @@ This pipeline evaluates **5 motif scanning methods** across **4 mRNA regions** u
 
 | # | Method | Description |
 |---|--------|-------------|
-| 1 | Clustered | Clustered motifs (3,866 motifs) |
+| 1 | Clustered | Clustered motifs |
 | 2 | Singleton | Singleton motifs |
-| 3 | Archetype | Archetype motifs (1,050 motifs) |
+| 3 | Archetype | Archetype motifs |
 | 4 | FIMO | FIMO-scanned motifs |
 | 5 | HOMER2 | HOMER2-scanned motifs |
 
@@ -57,15 +57,15 @@ base=/mnt/isilon/gandal_lab/mayl/.../05_benchmark_ENCODE_isoforms/00_scRBP_isofo
 
 | Script | Used in |
 |--------|---------|
-| `convert_prune_to_matrix_final.py` | Step 7 |
-| `adding_RBP_names_with_HepG2.py` | Step 8 |
-| `adding_RBP_names_with_K562.py` | Step 8 |
-| `merge_motif_rbp_matrix_twocell_lines.py` | Step 9 |
-| `zscore_motif_by_rbp_matrix_Motifrow_scale.py` | Step 10 |
-| `python_recovery_RBP_plot_final_main.py` | Step 11 |
-| `compare_recovery_curves.py` | Step 12 |
-| `merge_rbp_best_rank.py` | Step 13 |
-| `compare_recovery_curves_plotpdf.py` | Step 13 |
+| `convert_prune_to_matrix_final.py` | [Step 7](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/convert_prune_to_matrix_final.py) |
+| `adding_RBP_names_with_HepG2.py` | [Step 8](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/adding_RBP_names_with_HepG2.py) |
+| `adding_RBP_names_with_K562.py` | [Step 8](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/adding_RBP_names_with_K562.py) |
+| `merge_motif_rbp_matrix_twocell_lines.py` | [Step 9](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/merge_motif_rbp_matrix_twocell_lines.py) |
+| `zscore_motif_by_rbp_matrix_Motifrow_scale.py` | [Step 10](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/zscore_motif_by_rbp_matrix_Motifrow_scale.py) |
+| `python_recovery_RBP_plot_final_main.py` | [Step 11](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/python_recovery_RBP_plot_final_main.py) |
+| `compare_recovery_curves.py` | [Step 12](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/compare_recovery_curves.py) |
+| `merge_rbp_best_rank.py` | [Step 13](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/merge_rbp_best_rank.py) |
+| `compare_recovery_curves_plotpdf.py` | [Step 13](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/compare_recovery_curves_plotpdf.py) |
 
 ### Ground-truth files
 
@@ -442,29 +442,6 @@ python $tool/compare_recovery_curves.py \
 
 ---
 
-## Results Summary
-
-### Isoform-level assessment (Top-20 ranking)
-
-| Method | Recall Rate |
-|--------|-------------|
-| **Clustered motifs** | **0.849** |
-| HOMER motifs | 0.826 |
-| Singleton motifs | 0.822 |
-| FIMO motifs | 0.772 |
-| Archetype motifs | 0.703 |
-
-### Gene-level assessment (Top-20 ranking)
-
-| Method | Recall Rate |
-|--------|-------------|
-| **Clustered motifs** | **0.904** |
-| Singleton motifs | 0.885 |
-| FIMO motifs | 0.875 |
-| HOMER motifs | 0.875 |
-| Archetype motifs | 0.783 |
-
----
 
 ## Pipeline Flowchart
 
