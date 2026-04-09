@@ -1,11 +1,11 @@
-# RBP Binding-Region Preference Across 28 Tissues
+# RBP Binding-Region Preference Across 30 Tissues
 
 ## Overview
 
-This pipeline characterizes **RBP binding-region preferences** across 28 human tissues from the Tabula Sapiens single-cell atlas. For each tissue, we run the full scRBP pipeline (infer → merge → modules → prune) using 30 independent GRNBoost2 seeds, then analyze which mRNA regions (3'UTR, 5'UTR, CDS, Introns) each RBP preferentially binds across tissues.
+This pipeline characterizes **RBP binding-region preferences** across 2 brain tissues and 28 human tissues from the Tabula Sapiens single-cell atlas. For each tissue, we run the full scRBP pipeline (infer → merge → modules → prune) using 30 independent GRNBoost2 seeds, then analyze which mRNA regions (3'UTR, 5'UTR, CDS, Introns) each RBP preferentially binds across tissues.
 
 **Experimental design:**
-- 28 tissues, each with ~20K cells (geometric-sketched from Tabula Sapiens)
+- 2 brain tissues and 28 other human tissues, each with ~20K cells (geometric-sketched from Tabula Sapiens)
 - 30 GRNBoost2 runs per tissue (seeds 1001–1030) for consensus network construction
 - 4 mRNA regions per tissue: 3'UTR, 5'UTR, CDS, Introns
 - Regulon filtering: min 10 genes per regulon
@@ -659,6 +659,8 @@ if __name__ == "__main__":
 ## Step 8: Visualize RBP Region Preference with Hierarchical Clustering
 
 Generate publication-quality stacked bar plots and dendrogram-annotated horizontal bar plots showing RBP region-binding preferences, with optional hierarchical clustering into k groups.
+
+[z_grn_plot_rbp_region_pref_v2.py](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/transcript_region_preference_30Tissues/z_grn_plot_rbp_region_pref_counts_props_v2.py)
 
 ### Usage
 
