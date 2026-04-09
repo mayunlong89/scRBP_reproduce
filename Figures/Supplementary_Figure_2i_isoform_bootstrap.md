@@ -50,9 +50,9 @@ Total runs per step: **5 methods × 4 regions × 2 cell lines × 2 link types = 
 
 | Script | Step | Language |
 |--------|------|----------|
-| `filter_real_background_links.R` | 1 | R |
-| `calc_scaled_jaccard.py` | 2 | Python |
-| `bootstrap_cal.R` | 3 | R |
+| `filter_real_background_links.R` | [Step 1](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/filter_real_background_links.R) | R |
+| `calc_scaled_jaccard.py` | [Step 2](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/calc_scaled_jaccard.py) | Python |
+| `bootstrap_cal.R` | [Step 3](https://github.com/mayunlong89/scRBP_reproduce/blob/main/Analyses/Isoform_motif_ranking/bootstrap_cal.R) | R |
 
 ### Directory variables
 
