@@ -154,16 +154,6 @@ python $tool/compare_recovery_curves_plotpdf.py \
   --max_rank 100
 ```
 
-**Gene-level results (top 20 rank):**
-
-| Method | Recall Rate |
-|--------|-------------|
-| Clustered motifs | 0.904 |
-| Singleton motifs | 0.885 |
-| FIMO | 0.875 |
-| HOMER2 | 0.875 |
-| Archetype motifs | 0.783 |
-
 ---
 
 ## II. Isoform-Level AUC Analysis
@@ -202,16 +192,6 @@ python $tool/compare_recovery_curves_plotpdf.py \
   -o $output_dir/recovery_curve_all_5methods_merged4domains_isoform.pdf \
   --max_rank 100
 ```
-
-**Isoform-level results (top 20 rank):**
-
-| Method | Recall Rate |
-|--------|-------------|
-| Clustered motifs | 0.849 |
-| HOMER2 | 0.826 |
-| Singleton motifs | 0.822 |
-| FIMO | 0.772 |
-| Archetype motifs | 0.703 |
 
 ---
 
