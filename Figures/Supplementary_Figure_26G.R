@@ -76,3 +76,128 @@ p_sorted <- ggplot(df_bar2, aes(x = Proportion, y = disease, fill = grp)) +
   theme(plot.title = element_text(face="bold"))
 
 p_sorted
+
+
+
+
+
+
+
+#2026-02-11
+setwd("~/Desktop/UPENN/00UPenn-Projects/02-Aimed_projects/05-devBrain-RBP-methods/00-Manuscript-scRBP-2024/01_Data_analysis/13-scRBP_TRS_test/03_scRBP_trs_fetal_brain_15times/05_Developmental_devRegulons")
+
+
+suppressPackageStartupMessages({
+  library(tidyverse)
+  library(scales)
+})
+
+# ===== 1) 示例数据（替换成你的真实比例即可）=====
+df_wide <- tribble(
+  ~disease, ~devRegulons, ~non_devRegulons,
+  "SCZ",    72.6,         77.0,
+  "ADHD",   32.5,         25.0,
+  "ASD",    28.2,         31.0,
+  "BIP",    27.4,         37.0,
+  "AN",     23.9,         20.0,
+  "TS",     20.5,         14.0,
+  "MDD",    12.8,          9.0,
+  "OCD",     9.4,          6.0
+)
+
+disease_order <- c("SCZ","ADHD","ASD","BIP","AN","TS","MDD","OCD")
+
+df_long <- df_wide %>%
+  mutate(disease = factor(disease, levels = disease_order)) %>%
+  pivot_longer(
+    cols = c(devRegulons, non_devRegulons),
+    names_to = "group",
+    values_to = "prop_pct"
+  ) %>%
+  mutate(
+    group = recode(group,
+                   devRegulons = "devRegulons",
+                   non_devRegulons = "non-devRegulons"),
+    group = factor(group, levels = c("non-devRegulons", "devRegulons"))
+  )
+
+# ===== 2) 颜色（你可以换成自己 paper 的颜色）=====
+pal_group <- c(
+  "non-devRegulons" = "#F6C9C9",  # 浅粉
+  "devRegulons"     = "#E07B7B"   # 深粉
+)
+
+# ===== 3) 作图：boxplot + 点(带黑边框) + 配对线 =====
+p <- ggplot(df_long, aes(x = group, y = prop_pct)) +
+  # 配对连线（灰色）
+  geom_line(aes(group = disease), color = "grey60", linewidth = 0.8, alpha = 0.8) +
+  
+  # 箱线图（按组填充）
+  geom_boxplot(
+    aes(fill = group),
+    width = 0.55,
+    outlier.shape = NA,
+    alpha = 0.35,
+    color = "black",
+    linewidth = 0.9
+  ) +
+  
+  # 点：shape=21 才能同时设置边框(color)和填充(fill)
+  geom_point(
+    aes(fill = group),
+    shape = 21,
+    size = 3.0,
+    color = "black",
+    stroke = 0.7
+  ) +
+  
+  scale_fill_manual(values = pal_group) +
+  scale_y_continuous(
+    labels = function(x) paste0(x, "%"),
+    limits = c(0, NA),
+    expand = expansion(mult = c(0.05, 0.12))
+  ) +
+  labs(x = NULL, y = "Proportion of trait-relevant RBP regulons") +
+  theme_classic(base_size = 14) +
+  theme(
+    legend.title = element_blank(),
+    axis.text.x = element_text(size = 13),
+    axis.text.y = element_text(size = 13)
+  )
+
+p
+
+ggsave("paired_boxplot_groupColor.pdf", p, width = 4.0, height = 4.2, useDingbats = FALSE)
+ggsave("paired_boxplot_groupColor.tiff", p, width = 4.0, height = 4.2, dpi = 600, compression = "lzw")
+
+
+
+##-----OR odds ratio for two groups
+library(tidyverse)
+
+df <- tribble(
+  ~disease, ~dev, ~nondev,
+  "SCZ", 72.6, 77.0,
+  "ADHD", 32.5, 25.0,
+  "ASD", 28.2, 31.0,
+  "BIP", 27.4, 37.0,
+  "AN", 23.9, 20.0,
+  "TS", 20.5, 14.0,
+  "MDD", 12.8, 9.0,
+  "OCD", 9.4, 6.0
+)
+
+df_ratio <- df %>%
+  mutate(
+    PR = dev / nondev,
+    logPR = log(PR)
+  )
+
+df_ratio
+
+#calculate geometric mean proportion ratio
+exp(mean(log(df_ratio$PR)))
+
+
+
+
