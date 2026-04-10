@@ -1,6 +1,6 @@
 
 
-##--------Supplementary Figure S20h---proportion of significant RBP-regulons across diseases
+##--------proportion of significant RBP-regulons across diseases
 
 library(tidyverse)
 library(scales)
