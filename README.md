@@ -4,7 +4,7 @@ In this repository, we provided all analytic and visualized codes and examples t
 <table>
   <tr>
     <td>
-      <img src="https://raw.githubusercontent.com/mayunlong89/scRBP/main/Examples/scRBP_logo.png" width="350">
+      <img src="https://github.com/mayunlong89/scRBP/blob/main/Examples/scRBP_regulon_logo.png" width="350">
     </td>
     <td>
       <h1>scRBP</h1>
