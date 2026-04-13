@@ -5,10 +5,9 @@
 
 
 # "Type.v2"---> For main Figure 5A.
-# "Subtype.v2" ---> For Sup. Figure 19F.
 # "GW_group" ---> For Sup. Figure 19A.
 # "Dataset" ---> For Sup. Figure 19B.
-
+# "Subtype.v2" ---> For Sup. Figure 19C.
 
 
 # ============================================================
