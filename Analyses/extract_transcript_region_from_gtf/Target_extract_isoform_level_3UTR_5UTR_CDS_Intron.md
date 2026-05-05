@@ -100,7 +100,7 @@ bed_data <- data.frame(
 bed_data_unique <- bed_data[!duplicated(bed_data$name),]
 
 # Save BED file
-write.table(bed_data, file="5UTRs_hg38.bed", quote=FALSE, sep="\t", row.names=FALSE, col.names=FALSE)
+write.table(bed_data_unique, file="5UTRs_hg38.bed", quote=FALSE, sep="\t", row.names=FALSE, col.names=FALSE)
 
 # Extract CDS genomic regions -----------------------------------------
 txdb <- makeTxDbFromUCSC(genome="hg38", tablename="knownGene")
@@ -137,7 +137,7 @@ bed_data <- data.frame(
 bed_data_unique <- bed_data[!duplicated(bed_data$name),]
 
 # Save BED file
-write.table(bed_data, file="CDS_coordinate_hg38.bed", quote=FALSE, sep="\t", row.names=FALSE, col.names=FALSE)
+write.table(bed_data_unique, file="CDS_coordinate_hg38.bed", quote=FALSE, sep="\t", row.names=FALSE, col.names=FALSE)
 
 # Extract intron regions ---------------------------------------------
 txdb <- makeTxDbFromUCSC(genome="hg38", tablename="knownGene")
