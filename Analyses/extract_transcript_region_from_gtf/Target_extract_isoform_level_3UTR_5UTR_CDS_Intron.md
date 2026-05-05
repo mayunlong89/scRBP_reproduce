@@ -182,6 +182,7 @@ write.table(bed_data_unique, file="Introns_hg38.bed", quote=FALSE, sep="\t", row
 ```
 
 ### 1.2 bedtools --getfasta extract sequences of 3UTR, 5UTR, CDS, Intronic regions convert into .fasta files
+> This part adding `-s` parameter for considering strand information to make sure the correct identification of binding sites
 ```bash
 
 ref=/mnt/isilon/gandal_lab/mayl/reference/
