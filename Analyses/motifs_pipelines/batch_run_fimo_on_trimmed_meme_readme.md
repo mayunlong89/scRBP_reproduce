@@ -1,0 +1,1 @@
+./batch_run_fimo_on_trimmed_meme.sh ./pwm_convert_chen2meme_trimmed_splites  ./fimo_results_pwm_convert_chen2meme_trimmed_splites &
