@@ -1,6 +1,8 @@
-
+`2026-05-05`
 `2025-05-15`
 `2024-07-21`
+
+> very important codes for establishing RBP-motif resource
 
 ## 1. extract isoform_level 3UTR, 5UTR, CDS, intronic regions
 
@@ -192,7 +194,7 @@ ref=/mnt/isilon/gandal_lab/mayl/reference/
 bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
 output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
 
-bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/3UTRs_hg38.bed -fo $output/3UTR_transcript_regions_isoform_v2.fa -name
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/3UTRs_hg38.bed -fo $output/3UTR_transcript_regions_isoform_v2.fa -name -s
 
 
 #5UTR
@@ -200,7 +202,7 @@ ref=/mnt/isilon/gandal_lab/mayl/reference/
 bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
 output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
 
-bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/5UTRs_hg38.bed -fo $output/5UTR_transcript_regions_isoform_v2.fa -name
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/5UTRs_hg38.bed -fo $output/5UTR_transcript_regions_isoform_v2.fa -name -s
 
 
 #CDS
@@ -208,7 +210,7 @@ ref=/mnt/isilon/gandal_lab/mayl/reference/
 bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
 output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
 
-bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/CDS_hg38.bed -fo $output/CDS_transcript_regions_isoform_v2.fa -name
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/CDS_hg38.bed -fo $output/CDS_transcript_regions_isoform_v2.fa -name -s
 
 
 #Introns
@@ -216,7 +218,7 @@ ref=/mnt/isilon/gandal_lab/mayl/reference/
 bedfile=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/
 output=/mnt/isilon/gandal_lab/mayl/reference/transcript_regions/newVersion2_isoforms/
 
-bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/Introns_hg38.bed -fo $output/Introns_transcript_regions_isoform_v2.fa -name
+bedtools getfasta -fi $ref/GRCh38.primary_assembly.genome.fa -bed $bedfile/Introns_hg38.bed -fo $output/Introns_transcript_regions_isoform_v2.fa -name -s
 
 
 ```
