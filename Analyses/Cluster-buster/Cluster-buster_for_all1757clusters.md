@@ -11,7 +11,7 @@
 
 # For other singletons, we also individually run Cluster-buster method, which is same with the strategy 3.
 
-# Meanwhile, for benchmark, we also use all 25044 motifs to individually run Fimo and HOMER2. 
+# Meanwhile, for benchmark, we also use all 20746 motifs to individually run Fimo and HOMER2. 
 ##------------------------------------------------------------------------------------
 ```
 
@@ -22,8 +22,8 @@
 ##------------------------------------------------------------------------------------
 
 ##`PCA-Seurat-RSAT Workflow for Motif Clustering`
-#1) Clustering 25,044 Motifs
-Using PCA-Seurat-RSAT, we obtained 1,575 refined clusters from 25,044 motifs.
+#1) Clustering 20,746 Motifs
+Using PCA-Seurat-RSAT, we obtained 1,575 refined clusters from all motifs.
 
 These clusters were further analyzed using Cluster-Buster to identify regulatory modules.
 
@@ -33,8 +33,7 @@ Motif IDs for each cluster have been extracted using custom scripts.
 The resulting files are saved as Cluster9_cluster_01.txt.
 
 #3) Working Directory
-Location:
-/mnt/isilon/gandal_lab/mayl/05_RNA_binding_protein/08_HOMER/matrix-clustering_stand-alone/01_RBP_616RBPs_25044motifs/01_8758motifs_clustered/clusters/refined_clusters/
+#NA
 
 #4) RSAT Matrix Clustering
 Using RSAT matrix clustering, we refined the 164 main clusters into 1,575 refined clusters.
@@ -76,10 +75,10 @@ python process_count_motifs.py
  
  python create_annotation_metadata.py
 
-#2), clustered motif .ppm file extracted from all 25044 motifs.
+#2), clustered motif .ppm file extracted from all 20746 motifs.
 #using 'extract_pwm_from_allMotifs.py' to extract motif.ppm
 
-python extract_pwm_from_allMotifs.py -i 04_merged_all_25044motifs_all_databases.pwm -l ./cluster_ID/Cluster9_cluster_01.txt -o ./cluster_pwm/Cluster9_cluster_01.ppm
+python extract_pwm_from_allMotifs.py -i 04_merged_all_20746motifs_all_databases.pwm -l ./cluster_ID/Cluster9_cluster_01.txt -o ./cluster_pwm/Cluster9_cluster_01.ppm
 
 
 #3), using `convert_pwm_to_cluster.py` transform .ppm file scale to the format of Cluster-buster
