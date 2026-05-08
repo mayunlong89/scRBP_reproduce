@@ -1,0 +1,381 @@
+#!/usr/bin/env Rscript
+
+## ============================================================
+## Gene_coordinate_genomicRanges_scRBP.R
+##
+## Purpose:
+##   Extract transcript-domain genomic regions for scRBP:
+##   3'UTR, 5'UTR, CDS, and introns.
+##
+## Main outputs per domain:
+##   1. *.scan_regions.bed
+##      Coordinate-deduplicated BED file for motif scanning.
+##
+##   2. *.region_to_transcript.tsv
+##      Mapping table from scan region to transcript/gene/domain.
+##
+##   3. *.transcript_segments.bed
+##      Transcript-segment-level BED file, preserving all transcript-specific segments.
+##
+##   4. *.transcript_segments.metadata.tsv
+##      Metadata table for transcript-specific segments.
+##
+## Notes:
+##   - BED start is 0-based.
+##   - GenomicRanges start/end are 1-based.
+##   - Do NOT deduplicate by transcript name.
+##   - Use bedtools getfasta -s downstream for strand-aware sequence extraction.
+## ============================================================
+
+
+## -----------------------------
+## 1. Load libraries
+## -----------------------------
+
+suppressPackageStartupMessages({
+  library(GenomicFeatures)
+  library(GenomicRanges)
+  library(GenomeInfoDb)
+  library(AnnotationDbi)
+  library(dplyr)
+  library(readr)
+})
+
+
+## -----------------------------
+## 2. User parameters
+## -----------------------------
+
+genome_build <- "hg38"
+ucsc_table  <- "knownGene"
+
+outdir <- "scRBP_transcript_regions_hg38"
+dir.create(outdir, showWarnings = FALSE, recursive = TRUE)
+
+## Keep chr1-22, chrX, chrY by default.
+## You can add "chrM" if mitochondrial regions are needed.
+keep_chroms <- c(paste0("chr", 1:22), "chrX", "chrY")
+
+
+## -----------------------------
+## 3. Build TxDb
+## -----------------------------
+
+message("Building TxDb from UCSC: ", genome_build, " / ", ucsc_table)
+
+txdb <- makeTxDbFromUCSC(
+  genome = genome_build,
+  tablename = ucsc_table
+)
+
+
+## -----------------------------
+## 4. Helper: transcript-to-gene mapping
+## -----------------------------
+
+get_tx_gene_map <- function(txdb) {
+  
+  tx_keys <- keys(txdb, keytype = "TXNAME")
+  
+  tx_map <- AnnotationDbi::select(
+    txdb,
+    keys = tx_keys,
+    keytype = "TXNAME",
+    columns = c("TXNAME", "TXID", "GENEID")
+  )
+  
+  tx_map <- tx_map %>%
+    distinct(TXNAME, TXID, GENEID)
+  
+  colnames(tx_map) <- c("tx_name", "tx_id", "gene_id")
+  
+  return(tx_map)
+}
+
+tx_gene_map <- get_tx_gene_map(txdb)
+
+
+## -----------------------------
+## 5. Main helper function
+## -----------------------------
+
+make_scRBP_domain_files <- function(grl,
+                                    domain_name,
+                                    out_prefix,
+                                    tx_gene_map,
+                                    keep_chroms = NULL) {
+  
+  message("\nProcessing domain: ", domain_name)
+  
+  ## Remove empty transcript elements if present
+  grl <- grl[elementNROWS(grl) > 0]
+  
+  ## Unlist GRangesList to GRanges
+  gr <- unlist(grl, use.names = FALSE)
+  
+  ## Transcript name for each segment
+  tx_name <- rep(names(grl), elementNROWS(grl))
+  
+  ## Segment index within each transcript
+  part_index <- sequence(elementNROWS(grl))
+  
+  ## Keep standard chromosomes
+  if (!is.null(keep_chroms)) {
+    keep_idx <- as.character(seqnames(gr)) %in% keep_chroms
+    gr <- gr[keep_idx]
+    tx_name <- tx_name[keep_idx]
+    part_index <- part_index[keep_idx]
+  }
+  
+  ## Build transcript-segment-level metadata
+  segment_id <- sprintf(
+    "%s_txseg_%09d",
+    domain_name,
+    seq_along(gr)
+  )
+  
+  seg_df <- data.frame(
+    transcript_segment_id = segment_id,
+    domain = domain_name,
+    tx_name = tx_name,
+    part_index = part_index,
+    chrom = as.character(seqnames(gr)),
+    start_1based = start(gr),
+    end_1based = end(gr),
+    start_0based = start(gr) - 1L,
+    end_bed = end(gr),
+    width = width(gr),
+    strand = as.character(strand(gr)),
+    stringsAsFactors = FALSE
+  )
+  
+  ## Add gene ID
+  seg_df <- seg_df %>%
+    left_join(tx_gene_map, by = "tx_name") %>%
+    relocate(gene_id, .after = tx_name) %>%
+    relocate(tx_id, .after = tx_name)
+  
+  ## BED file preserving all transcript-specific segments
+  transcript_bed <- seg_df %>%
+    transmute(
+      chrom = chrom,
+      start = start_0based,
+      end = end_bed,
+      name = transcript_segment_id,
+      score = ".",
+      strand = strand
+    )
+  
+  ## Coordinate-deduplicated scan regions
+  ## Important:
+  ##   This avoids scanning the same genomic segment multiple times
+  ##   when several transcripts share the same exon/CDS/UTR/intron segment.
+  coord_df <- seg_df %>%
+    distinct(domain, chrom, start_0based, end_bed, strand) %>%
+    arrange(chrom, start_0based, end_bed, strand) %>%
+    mutate(
+      region_id = sprintf(
+        "%s_region_%09d",
+        domain_name,
+        row_number()
+      )
+    )
+  
+  ## Link transcript segments to coordinate-deduplicated scan regions
+  seg_df <- seg_df %>%
+    left_join(
+      coord_df,
+      by = c("domain", "chrom", "start_0based", "end_bed", "strand")
+    ) %>%
+    relocate(region_id, .before = transcript_segment_id)
+  
+  scan_bed <- coord_df %>%
+    transmute(
+      chrom = chrom,
+      start = start_0based,
+      end = end_bed,
+      name = region_id,
+      score = ".",
+      strand = strand
+    )
+  
+  region_to_transcript <- seg_df %>%
+    select(
+      region_id,
+      transcript_segment_id,
+      domain,
+      tx_name,
+      tx_id,
+      gene_id,
+      part_index,
+      chrom,
+      start_1based,
+      end_1based,
+      start_0based,
+      end_bed,
+      width,
+      strand
+    )
+  
+  ## Output paths
+  transcript_bed_file <- file.path(
+    outdir,
+    paste0(out_prefix, ".transcript_segments.bed")
+  )
+  
+  transcript_meta_file <- file.path(
+    outdir,
+    paste0(out_prefix, ".transcript_segments.metadata.tsv")
+  )
+  
+  scan_bed_file <- file.path(
+    outdir,
+    paste0(out_prefix, ".scan_regions.bed")
+  )
+  
+  region_map_file <- file.path(
+    outdir,
+    paste0(out_prefix, ".region_to_transcript.tsv")
+  )
+  
+  ## Write files
+  write.table(
+    transcript_bed,
+    file = transcript_bed_file,
+    quote = FALSE,
+    sep = "\t",
+    row.names = FALSE,
+    col.names = FALSE
+  )
+  
+  write_tsv(
+    seg_df,
+    transcript_meta_file
+  )
+  
+  write.table(
+    scan_bed,
+    file = scan_bed_file,
+    quote = FALSE,
+    sep = "\t",
+    row.names = FALSE,
+    col.names = FALSE
+  )
+  
+  write_tsv(
+    region_to_transcript,
+    region_map_file
+  )
+  
+  ## QC
+  qc <- data.frame(
+    domain = domain_name,
+    n_transcript_segments = nrow(transcript_bed),
+    n_scan_regions_coordinate_deduplicated = nrow(scan_bed),
+    n_unique_transcripts = length(unique(seg_df$tx_name)),
+    n_unique_genes = length(unique(na.omit(seg_df$gene_id))),
+    n_missing_gene_id_segments = sum(is.na(seg_df$gene_id)),
+    transcript_bed_file = transcript_bed_file,
+    scan_bed_file = scan_bed_file,
+    region_map_file = region_map_file,
+    stringsAsFactors = FALSE
+  )
+  
+  print(qc)
+  
+  return(
+    list(
+      transcript_bed = transcript_bed,
+      scan_bed = scan_bed,
+      metadata = seg_df,
+      region_to_transcript = region_to_transcript,
+      qc = qc
+    )
+  )
+}
+
+
+## -----------------------------
+## 6. Extract transcript domains
+## -----------------------------
+
+message("\nExtracting 3'UTR regions...")
+threeUTRs <- threeUTRsByTranscript(
+  txdb,
+  use.names = TRUE
+)
+
+message("\nExtracting 5'UTR regions...")
+fiveUTRs <- fiveUTRsByTranscript(
+  txdb,
+  use.names = TRUE
+)
+
+message("\nExtracting CDS regions...")
+cds_regions <- cdsBy(
+  txdb,
+  by = "tx",
+  use.names = TRUE
+)
+
+message("\nExtracting intron regions...")
+intron_regions <- intronsByTranscript(
+  txdb,
+  use.names = TRUE
+)
+
+
+## -----------------------------
+## 7. Generate output files
+## -----------------------------
+
+res_3utr <- make_scRBP_domain_files(
+  grl = threeUTRs,
+  domain_name = "3UTR",
+  out_prefix = "3UTRs_hg38",
+  tx_gene_map = tx_gene_map,
+  keep_chroms = keep_chroms
+)
+
+res_5utr <- make_scRBP_domain_files(
+  grl = fiveUTRs,
+  domain_name = "5UTR",
+  out_prefix = "5UTRs_hg38",
+  tx_gene_map = tx_gene_map,
+  keep_chroms = keep_chroms
+)
+
+res_cds <- make_scRBP_domain_files(
+  grl = cds_regions,
+  domain_name = "CDS",
+  out_prefix = "CDS_hg38",
+  tx_gene_map = tx_gene_map,
+  keep_chroms = keep_chroms
+)
+
+res_intron <- make_scRBP_domain_files(
+  grl = intron_regions,
+  domain_name = "Intron",
+  out_prefix = "Introns_hg38",
+  tx_gene_map = tx_gene_map,
+  keep_chroms = keep_chroms
+)
+
+
+## -----------------------------
+## 8. Save global QC summary
+## -----------------------------
+
+qc_summary <- bind_rows(
+  res_3utr$qc,
+  res_5utr$qc,
+  res_cds$qc,
+  res_intron$qc
+)
+
+qc_file <- file.path(outdir, "scRBP_transcript_region_QC_summary.tsv")
+
+write_tsv(qc_summary, qc_file)
+
+message("\nDone.")
+message("QC summary written to: ", qc_file)
