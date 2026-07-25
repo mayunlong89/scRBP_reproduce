@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+# =============================================================================
+# Supplementary Fig. 14e: right-tail enrichment of cognate-RBP self-ranks.
+#
+# Fraction of the 1,702 regulons whose cognate RBP ranked within the top 25%,
+# 10% or 5% of all 496 perturbations (i.e. self-rank >= 0.75 / 0.90 / 0.95),
+# compared with the chance expectations (0.25 / 0.10 / 0.05). Significance from
+# a one-sided binomial test.
+#
+# Input : sectionA/sectionA_topN.tsv   (rows with cutoff == "1000"; self_rank)
+# Output: sectionA/figures/panel_e_righttail_standalone.{png,pdf}
+# Run   : srun --partition=defq --mem=4G --time=00:15:00 python3 50_panel_e_righttail.py
+# =============================================================================
+import csv
+import numpy as np
+from scipy.stats import binomtest
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+# ---- paths -----------------------------------------------------------------
+BASE = "/mnt/isilon/gandal_lab/mayl/05_RNA_binding_protein/00_scRBP_perturb-seq_results/results_regulon_validation_K562_20260709"
+TSV  = f"{BASE}/sectionA/sectionA_topN.tsv"
+OUT  = f"{BASE}/sectionA/figures/panel_e_righttail_standalone"
+CUTOFF = "1000"
+
+XLABEL = "Cognate RBP rank (top % of all 496 perturbations)"
+# (label, self-rank threshold, chance expectation)
+BINS = [("top 25%", 0.75, 0.25), ("top 10%", 0.90, 0.10), ("top 5%", 0.95, 0.05)]
+
+# ---- palette ---------------------------------------------------------------
+INK, INK2, MUTED, GRID, SURF = "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#fcfcfb"
+GREY, RED = "#bdbbb2", "#e34948"
+plt.rcParams.update({
+    "figure.facecolor": SURF, "axes.facecolor": SURF, "savefig.facecolor": SURF,
+    "axes.edgecolor": "#4d4d4d", "axes.linewidth": .8, "axes.labelcolor": INK,
+    "xtick.color": INK2, "ytick.color": INK2, "text.color": INK, "font.size": 10,
+    "axes.spines.top": False, "axes.spines.right": False, "grid.color": GRID,
+    "grid.linewidth": .5, "pdf.fonttype": 42, "font.family": "sans-serif",
+    "font.sans-serif": ["DejaVu Sans"],
+})
+
+# ---- load ------------------------------------------------------------------
+rows = [r for r in csv.DictReader(open(TSV), delimiter="\t") if r["cutoff"] == CUTOFF]
+sr = np.array([float(r["self_rank"]) for r in rows])
+n = len(sr)
+
+# ---- draw ------------------------------------------------------------------
+fig, ax = plt.subplots(figsize=(6.6, 4.0))
+xp = np.arange(len(BINS)); w = 0.36
+for i, (lab, thr, exp) in enumerate(BINS):
+    k = int((sr >= thr).sum()); obs = k / n
+    p = binomtest(k, n, exp, alternative="greater").pvalue
+    star = "***" if p < 1e-3 else "**" if p < 1e-2 else "*" if p < 0.05 else "ns"
+    ax.bar(i - w / 2, exp, w, color=GREY, label="chance" if i == 0 else None, zorder=2)
+    ax.bar(i + w / 2, obs, w, color=RED,  label="observed" if i == 0 else None, zorder=3)
+    ax.text(i + w / 2, obs + .006, f"{obs*100:.1f}%\n{obs/exp:.1f}×, {star}",
+            ha="center", va="bottom", fontsize=8.5, weight="bold", color=RED)
+
+ax.set_xticks(xp); ax.set_xticklabels([b[0] for b in BINS])
+ax.set_ylim(0, 0.40)
+ax.set_xlabel(XLABEL)
+ax.set_ylabel("fraction of regulons")
+ax.legend(fontsize=8, frameon=False, loc="upper right")
+
+fig.tight_layout()
+for ext in ("png", "pdf"):
+    fig.savefig(f"{OUT}.{ext}", dpi=350, bbox_inches="tight")
+print(f"wrote {OUT}.png / .pdf   (n={n})")
