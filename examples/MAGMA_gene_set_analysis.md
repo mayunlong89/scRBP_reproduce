@@ -14,11 +14,11 @@ export DATA=/share/pub/mayl/MAGMA_test
 export OUTPUT=/share/pub/mayl/MAGMA_test
 
 #MAGMA annotation:
-# By default, a 10 kb window centered on the TSS of a gene is used.
+# By default, a 50 kb window centered on the TSS of a gene is used.
 
 $MAGMA_DIR/magma \
     --snp-loc  $DATA/GWAS_UKBiobank_summary_final.hg19.location  \
-    --annotate window=10,10 --gene-loc $MAGMA_DIR/NCBI37.3.gene.loc \
+    --annotate window=25,25 --gene-loc $MAGMA_DIR/NCBI37.3.gene.loc \
     --out $OUTPUT/GWAS_UKBiobank_summary_final.hg19_SNP_Gene_annotation  
 
 # gene-based association analysis:
